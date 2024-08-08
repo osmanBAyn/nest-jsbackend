@@ -17,4 +17,51 @@ model User{
   email    String @unique()
   password String 
   profilePictureURL   String @default("")
+  friends  User[]   @relation("UserFriends")
+  friendOf User[]   @relation("UserFriends")
+
+  userFriends Friendship[]  @relation(name:"users")
+  userFriendOf  Friendship[]  @relation(name: "friend_users")
+
+  conversations Conversation[]
+
+  messages Message[]
 }
+
+model Friendship{
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  friendUserId Int
+  User        User   @relation(name: "users", fields: [userId], references: [id])
+  FriendUser  User   @relation(name: "friend_users", fields: [friendUserId], references: [id])
+  status       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  @@unique([userId, friendUserId])
+}
+
+model Conversation{
+  id    Int    @id @default(autoincrement())
+  users   User[]
+  name    String?
+  isGroup  Boolean   @default(false)
+
+  messages   Message[]
+}
+model Message{
+  id    Int   @id @default(autoincrement())
+  body  String?
+  image String?
+
+  conversationId Int
+  conversation  Conversation  @relation(fields: [conversationId], references: [id])
+
+  senderId   Int
+  sender  User @relation(fields: [senderId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+// model Friend{
+//   id      Int @id() @default(autoincrement())
+//   user    User @relation([fields])
+//   userId  String  
+// }

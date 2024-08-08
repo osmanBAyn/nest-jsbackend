@@ -21,14 +21,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy){
         done: VerifyCallback, ) : Promise<any>{
             console.log(profile);
             const email = profile.email;
-            const found =await this.userService.findUser(email);
+            let found =await this.userService.findUser(email);
+            if(!found){
+                await this.userService.insertUser(email, "google", profile.picture);
+                found =await this.userService.findUser(email);
+            }
             const user = {
                 email,
                 profilePictureURL : profile.picture,
                 userId : found.id
-            }
-            if(!found){
-                this.userService.insertUser(user.email, "google", user.profilePictureURL);
             }
             done(null, user);
     }
